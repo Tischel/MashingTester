@@ -16,7 +16,7 @@ class StateMachine:
 
         self.joystick_count = pygame.joystick.get_count()
         if self.joystick_count == 0:
-            self.state = ERROR
+            self.state = State.ERROR
         elif self.joystick_count == 1:
             self.state = State.BUTTON_SELECT
             self.joystick = pygame.joystick.Joystick(0)
@@ -134,8 +134,12 @@ class StateMachine:
 
     def render(self, screen):
         screen.fill(0)
+
+        if self.state == State.ERROR:
+            self.drawText("No controller detected", screen, screen.get_width() / 2, 20)
+            self.drawText("Plug in a controller and restart the program", screen, screen.get_width() / 2, 50)
         
-        if self.state == State.CONTROLLER_SELECT:
+        elif self.state == State.CONTROLLER_SELECT:
             self.drawText("Select a controller and press ENTER to continue", screen, screen.get_width() / 2, 20)
 
             for i in range (0, self.joystick_count):
