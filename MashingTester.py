@@ -6,7 +6,7 @@ class App:
     def __init__(self):
         pygame.init()
 
-        pygame.display.set_caption("Mashing Tester v0.0.2")
+        pygame.display.set_caption("Mashing Tester v0.0.3")
         pygame.joystick.init()
 
         self.screen = pygame.display.set_mode( (800, 600) )

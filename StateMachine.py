@@ -38,6 +38,7 @@ class StateMachine:
 
         self.test_duration = 5
         self.countdown_duration = 3
+        self.is_invalid = False
         self.reset()
         
         
@@ -84,9 +85,13 @@ class StateMachine:
                         self.last_pressed_button = None
 
         elif self.state == State.MAIN:
+
+            button_0_down = self.isButtonPressed(0)
+            button_1_down = self.isButtonPressed(1)
+
             for event in events:
                 if (event.type == KEYUP and event.key == K_RETURN):
-                    if self.test_finished:
+                    if self.test_finished or self.is_invalid:
                         self.reset()
                     elif self.test_start_time is None and self.countdown_start_time is None:
                         self.countdown_start_time = time.time()
@@ -100,15 +105,18 @@ class StateMachine:
             if self.countdown_start_time is not None:
                 if time.time() > self.countdown_start_time + self.countdown_duration:
                     self.countdown_start_time = None
+                elif button_0_down == True or button_1_down == True:
+                    self.is_invalid = True
+                    return
+
+            if self.is_invalid == True:
+                return
 
             if self.countdown_start_time is None and self.test_start_time is not None:
                 if time.time() > self.test_start_time + self.test_duration:
                     self.test_start_time = None
                     self.test_finished = True
                     return
-
-                button_0_down = self.isButtonPressed(0)
-                button_1_down = self.isButtonPressed(1)
 
                 # check first button
                 if button_0_down == False and self.buttons_state[0] == True:
@@ -131,6 +139,7 @@ class StateMachine:
         self.button_press_count = 0
         self.successful_button_press_count = 0
         self.test_finished = False
+        self.is_invalid = False
 
     def render(self, screen):
         screen.fill(0)
@@ -164,7 +173,12 @@ class StateMachine:
                 self.drawText("BUTTON " + str(i+1) + " ID: " + str(self.buttons[i]), screen, screen.get_width() / 2, 100 + i * 20)
 
         elif self.state == State.MAIN:
-            if self.countdown_start_time is not None:
+
+            if self.is_invalid == True:
+                self.drawText("YOU STARTED MASHING TOO EARLY!!!", screen, screen.get_width() / 2, 30)
+                self.drawText("Press ENTER to continue.", screen, screen.get_width() / 2, 50)
+
+            elif self.countdown_start_time is not None:
                 countdown = max(0, self.countdown_start_time + self.countdown_duration - time.time())
                 self.drawText("STAR MASHING IN " + "{:3.1f}".format(countdown), screen, screen.get_width() / 2, 30)
 
